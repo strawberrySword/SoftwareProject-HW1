@@ -4,51 +4,41 @@ import sys
 def kMeans(dataPoints, k, n, d, iter=200 ):
     # initialize centroids to first k data points
     epsilon = 0.001
-    clusters = []
     centroids = []
     for i in range(k):
-        centroids.append({'center': dataPoints[i].copy(), 'size': 1, 'lastDelta': 0})
-        clusters.append(i)
-    
-    for i in range(k,n):
-        clusters.append(-1)
-
+        centroids.append({'center': dataPoints[i].copy(), 'currentCenter': [0]*d, 'size': 0})
+        
     i = 0
     maxDelta = epsilon + 1
     while(i < iter and maxDelta > epsilon):
         for j in range(n):
             closestCluster = findClosestCluster(dataPoints[j], centroids)
-            clusters[j] = closestCluster
-            
-            # oldCluster = clusters[j]
-            # centroids[closestCluster]['lastDelta'] = 0
-            # if(oldCluster == -1):
-            #     centroids[closestCluster] = addDataPoint(centroids[closestCluster], dataPoints[j])
-                
-            # if(oldCluster != -1 and oldCluster != closestCluster):
-            #     centroids[closestCluster] = addDataPoint(centroids[closestCluster], dataPoints[j])  
-            #     centroids[oldCluster] = removeDataPoint(centroids[oldCluster], dataPoints[j])
-            
-        # maxDelta = 0
-
+            centroids[closestCluster]['size'] += 1
+            centroids[closestCluster]['currentCenter'] = sumList(centroids[closestCluster]['currentCenter'], dataPoints[j])
         
-                        
-                
+        maxDelta = 0 
+        for u in centroids:
+            u['currentCenter'] = [x / (u['size']) for x in u['currentCenter']]
+            delta = calcEclideanDistance(u['currentCenter'], u['center'])
+            if(delta > maxDelta):
+                maxDelta = delta
+            u['center'] = u['currentCenter'].copy()
+            u['currentCenter'] = [0]*d
+            u['size'] = 0
         i += 1
-    print(i)
-    print(maxDelta)
-    # print centroids
+        
     for u in centroids:
         formatted = [ '%.4f' % elem for elem in u['center'] ]
         print(','.join(formatted))
 
+def sumList(a,b):
+    return [x + y for x,y in zip(a,b)]
+
 def findClosestCluster(datapoint, centroids):
     minDistance = calcEclideanDistance(centroids[0]['center'], datapoint)
     closestCluster = 0
-    distances = []
     for index, u in enumerate(centroids):
         distance = calcEclideanDistance(u['center'], datapoint)
-        distances.append(distance)
         if(distance < minDistance):
             minDistance = distance
             closestCluster = index
@@ -59,25 +49,6 @@ def calcEclideanDistance(u, v):
     for i in range(len(u)):
         squareSum += (u[i] - v[i])*(u[i] - v[i])
     return math.sqrt(squareSum)
-    
-
-def addDataPoint(centroid, datapoint):
-    oldCenter = centroid['center'].copy()
-    for index, w in enumerate(centroid['center']):
-        centroid['center'][index] = (w*centroid['size'] + datapoint[index])/(centroid['size'] + 1)
-    newDelta = calcEclideanDistance(oldCenter, centroid['center'])
-    centroid['size'] += 1
-    centroid['lastDelta'] = newDelta
-    return centroid
-
-def removeDataPoint(centroid, datapoint):
-    oldCenter = centroid['center'].copy()
-    for index, w in enumerate(centroid['center']):
-        centroid['center'][index] = ((w*centroid['size']) - datapoint[index])/(centroid['size']-1)
-    newDelta = calcEclideanDistance(oldCenter, centroid['center'])
-    centroid['size'] -= 1
-    centroid['lastDelta'] = newDelta
-    return centroid
 
 def parseArgs(args):
     try:
@@ -128,8 +99,7 @@ def parseDataPoints(filePath):
 if __name__ == '__main__':
     k, n, d, iter, filePath = parseArgs(sys.argv)
     list = parseDataPoints(filePath)
-    kMeans(list, k, n, d, iter)
-    
+
     try:
         kMeans(list, k, n, d, iter)
     except:
