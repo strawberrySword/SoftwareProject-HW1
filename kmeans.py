@@ -1,4 +1,3 @@
-import math
 import sys
 
 def kMeans(dataPoints, k, n, d, iter=200 ):
@@ -47,8 +46,8 @@ def findClosestCluster(datapoint, centroids):
 def calcEclideanDistance(u, v):
     squareSum = 0
     for i in range(len(u)):
-        squareSum += (u[i] - v[i])*(u[i] - v[i])
-    return math.sqrt(squareSum)
+        squareSum += (u[i] - v[i])**2
+    return squareSum**0.5
 
 def parseArgs(args):
     try:
