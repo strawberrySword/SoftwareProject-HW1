@@ -13,6 +13,7 @@ typedef struct
 
 int findClosestCluster(float[], Centroid[], int, int);
 float CalcEclideanDistance(float[], float[], int);
+int isNumber(char[]);
 
 float CalcEclideanDistance(float u[], float v[], int d)
 {
@@ -46,6 +47,22 @@ int findClosestCluster(float dataPoint[], Centroid centroids[], int d, int k)
    return closest;
 }
 
+int isNumber(char number[])
+{
+   int i;
+   i = 0;
+
+   if (number[0] == '-')
+      i = 1;
+   for (; number[i] != 0; i++)
+   {
+
+      if (number[i] > '9' || number[i] < '0')
+         return 0;
+   }
+   return 1;
+}
+
 int main(int argc, char *argv[])
 {
    /* declerations */
@@ -53,21 +70,62 @@ int main(int argc, char *argv[])
    float current, maxDelta, delta;
    Centroid *centroids;
    float **dataPoints;
-   printf("%d\n", argc);
+
    /* parsing parameters */
+   if (!(argc == 4 || argc == 5))
+   {
+      printf("An Error Has Occurred");
+      exit(EXIT_FAILURE);
+   }
+
    k = atoi(argv[1]);
    n = atoi(argv[2]);
    d = atoi(argv[3]);
-   iter = atoi(argv[4]);
+   iter = 200;
+   if (argc == 5)
+   {
+      iter = atoi(argv[4]);
+      if ((iter <= 0 || iter >= 1000) || !isNumber(argv[4]))
+      {
+         fprintf(stderr, "Invalid maximum iteration!");
+         exit(EXIT_FAILURE);
+      }
+   }
+   if (n <= 1 || !isNumber(argv[2]))
+   {
+      fprintf(stderr, "Invalid number of points!");
+      exit(EXIT_FAILURE);
+   }
+   if ((k <= 1 || k >= n) || !isNumber(argv[1]))
+   {
+      fprintf(stderr, "Invalid number of clusters!");
+      exit(EXIT_FAILURE);
+   }
+   if (d <= 0 || !isNumber(argv[3]))
+   {
+      fprintf(stderr, "Invalid dimension of point!");
+      exit(EXIT_FAILURE);
+   }
 
    /* allocation */
 
    centroids = calloc(k, sizeof(Centroid));
    dataPoints = (float **)calloc(n, sizeof(float *));
 
+   if (centroids == NULL || dataPoints == NULL)
+   {
+      fprintf(stderr, "An Error Has Occurred");
+      exit(EXIT_FAILURE);
+   }
+
    for (i = 0; i < n; i++)
    {
       dataPoints[i] = (float *)calloc(d, sizeof(float));
+      if (dataPoints[i] == NULL)
+      {
+         fprintf(stderr, "An Error Has Occurred");
+         exit(EXIT_FAILURE);
+      }
    }
 
    /* parsing the input */
@@ -85,6 +143,11 @@ int main(int argc, char *argv[])
       centroids[i].size = 0;
       centroids[i].center = (float *)calloc(d, sizeof(float));
       centroids[i].currentCenter = (float *)calloc(d, sizeof(float));
+      if (centroids[i].center == NULL || centroids[i].currentCenter == NULL)
+      {
+         fprintf(stderr, "An Error Has Occurred");
+         exit(EXIT_FAILURE);
+      }
 
       for (j = 0; j < d; j++)
       {
