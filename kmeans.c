@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
    }
    if ((k <= 1 || k >= n) || !isNumber(argv[1]))
    {
-      printf(stderr, "Invalid number of clusters!");
+      printf("Invalid number of clusters!");
       return 1;
    }
    if (d <= 0 || !isNumber(argv[3]))
