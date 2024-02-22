@@ -66,7 +66,7 @@ int isNumber(char number[])
 int main(int argc, char *argv[])
 {
    /* declerations */
-   int i, j, l, n, k, d, iter, closest;
+   int i, j, l, n, k, d, iter, closest, returnValue;
    double current, maxDelta, delta;
    Centroid *centroids;
    double **dataPoints;
@@ -77,6 +77,7 @@ int main(int argc, char *argv[])
       printf("An Error Has Occurred");
       return 1;
    }
+   returnValue = 0;
 
    k = atoi(argv[1]);
    n = atoi(argv[2]);
@@ -87,23 +88,23 @@ int main(int argc, char *argv[])
       iter = atoi(argv[4]);
       if ((iter <= 0 || iter >= 1000) || !isNumber(argv[4]))
       {
-         fprintf(stderr, "Invalid maximum iteration!");
+         printf("Invalid maximum iteration!");
          return 1;
       }
    }
    if (n <= 1 || !isNumber(argv[2]))
    {
-      fprintf(stderr, "Invalid number of points!");
+      printf("Invalid number of points!");
       return 1;
    }
    if ((k <= 1 || k >= n) || !isNumber(argv[1]))
    {
-      fprintf(stderr, "Invalid number of clusters!");
+      printf("Invalid number of clusters!");
       return 1;
    }
    if (d <= 0 || !isNumber(argv[3]))
    {
-      fprintf(stderr, "Invalid dimension of point!");
+      printf("Invalid dimension of point!");
       return 1;
    }
 
@@ -114,8 +115,9 @@ int main(int argc, char *argv[])
 
    if (centroids == NULL || dataPoints == NULL)
    {
-      fprintf(stderr, "An Error Has Occurred");
-      return 1;
+      printf("An Error Has Occurred");
+      returnValue = 1;
+      goto FREE;
    }
 
    for (i = 0; i < n; i++)
@@ -123,8 +125,9 @@ int main(int argc, char *argv[])
       dataPoints[i] = (double *)calloc(d, sizeof(double));
       if (dataPoints[i] == NULL)
       {
-         fprintf(stderr, "An Error Has Occurred");
-         return 1;
+         printf("An Error Has Occurred");
+         returnValue = 1;
+         goto FREE;
       }
    }
 
@@ -145,8 +148,9 @@ int main(int argc, char *argv[])
       centroids[i].currentCenter = (double *)calloc(d, sizeof(double));
       if (centroids[i].center == NULL || centroids[i].currentCenter == NULL)
       {
-         fprintf(stderr, "An Error Has Occurred");
-         exit(EXIT_FAILURE);
+         printf("An Error Has Occurred");
+         returnValue = 1;
+         goto FREE;
       }
 
       for (j = 0; j < d; j++)
@@ -211,7 +215,8 @@ int main(int argc, char *argv[])
       printf("\n");
    }
 
-   /* free all allocated space */
+/* free all allocated space */
+FREE:
    for (i = 0; i < k; i++)
    {
       free(centroids[i].center);
@@ -224,5 +229,5 @@ int main(int argc, char *argv[])
       free(dataPoints[i]);
    }
    free(dataPoints);
-   return 0;
+   return returnValue;
 }
